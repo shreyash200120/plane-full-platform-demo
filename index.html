@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Plane — AI-native project management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0E14;--s1:#111318;--s2:#181B23;--s3:#1E2230;--s4:#252A3A;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#E8EBF4;--t2:#7A85A0;--t3:#3D4559;
+  --plane:#4C8EF5;--pd:rgba(76,142,245,0.1);--pb:rgba(76,142,245,0.25);
+  --green:#22C55E;--gd:rgba(34,197,94,0.08);--gb:rgba(34,197,94,0.25);
+  --red:#EF4444;--rd:rgba(239,68,68,0.08);--rb:rgba(239,68,68,0.25);
+  --amber:#F59E0B;--ad:rgba(245,158,11,0.08);--ab:rgba(245,158,11,0.25);
+  --purple:#A78BFA;--pd2:rgba(167,139,250,0.08);--pb2:rgba(167,139,250,0.25);
+  --teal:#2DD4BF;--td:rgba(45,212,191,0.08);--tb:rgba(45,212,191,0.25);
+  --pink:#F472B6;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
+  --r:8px;--rsm:5px;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{height:46px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
+.tb-logo{display:flex;align-items:center;gap:8px;margin-right:16px;cursor:pointer;}
+.tb-logo-mark{width:26px;height:26px;background:linear-gradient(135deg,#4C8EF5,#A78BFA);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;}
+.tb-logo-text{font-size:15px;font-weight:700;letter-spacing:-0.3px;}
+.tb-ws{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--t2);cursor:pointer;padding:4px 8px;border-radius:var(--rsm);transition:background 0.1s;}
+.tb-ws:hover{background:var(--s3);}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.tb-pill{display:flex;align-items:center;gap:4px;padding:3px 9px;border-radius:4px;font-size:11px;font-family:var(--mono);}
+.tp-ai{background:var(--pd2);color:var(--purple);border:1px solid var(--pb2);}
+.tp-live{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
+.tp-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.tb-btn{padding:5px 12px;border-radius:var(--rsm);font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;transition:all 0.12s;border:1px solid var(--border2);background:var(--s2);color:var(--t2);}
+.tb-btn:hover{border-color:var(--pb);color:var(--plane);}
+.tb-btn-solid{background:var(--plane);border-color:var(--plane);color:#fff;}
+.tb-btn-solid:hover{background:#3A7AE8;}
+.tb-avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#4C8EF5,#A78BFA);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sb-ws{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.sb-ws:hover{background:var(--s2);}
+.sb-ws-icon{width:30px;height:30px;background:linear-gradient(135deg,#4C8EF5,#A78BFA);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-ws-name{font-size:13px;font-weight:600;}
+.sb-ws-plan{font-size:10px;color:var(--t3);font-family:var(--mono);}
+.sb-sec{font-size:9.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.1em;color:var(--t3);padding:10px 12px 3px;margin-top:2px;}
+.sb-item{display:flex;align-items:center;gap:8px;padding:6px 11px;border-radius:var(--rsm);font-size:12.5px;color:var(--t2);cursor:pointer;background:none;border:none;width:calc(100%-8px);margin:1px 4px;text-align:left;font-family:var(--sans);transition:all 0.1s;width:calc(100% - 8px);}
+.sb-item:hover{background:var(--s3);color:var(--text);}
+.sb-item.on{background:var(--pd);color:var(--plane);font-weight:500;}
+.sb-ic{font-size:14px;width:17px;text-align:center;flex-shrink:0;}
+.sb-ct{margin-left:auto;font-family:var(--mono);font-size:9px;background:var(--s3);padding:1px 5px;border-radius:3px;color:var(--t3);}
+.sb-item.on .sb-ct{background:var(--pd);color:var(--plane);}
+.sb-proj{padding:4px 11px 2px;display:flex;flex-direction:column;gap:1px;}
+.sp-item{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:var(--rsm);font-size:12px;color:var(--t2);cursor:pointer;transition:all 0.1s;}
+.sp-item:hover{background:var(--s3);color:var(--text);}
+.sp-item.on{color:var(--plane);}
+.sp-emoji{font-size:13px;width:16px;text-align:center;}
+.attr{margin:auto 8px 8px;padding:9px 10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);font-size:10.5px;color:var(--t3);line-height:1.7;}
+.attr a{color:var(--plane);text-decoration:none;}
+.attr strong{color:var(--t2);}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* PAGE */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;}
+.page.on{display:flex;}
+
+/* ── HOME / DASHBOARD ── */
+.home-page{flex:1;overflow-y:auto;padding:20px;}
+.hp-title{font-size:20px;font-weight:700;letter-spacing:-0.5px;margin-bottom:4px;}
+.hp-sub{font-size:13px;color:var(--t2);margin-bottom:20px;}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.dg-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;}
+.dgc-lbl{font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:4px;}
+.dgc-val{font-size:28px;font-weight:700;letter-spacing:-1px;}
+.dgc-sub{font-size:11.5px;color:var(--t2);margin-top:3px;}
+.proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.proj-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;cursor:pointer;transition:all 0.15s;}
+.proj-card:hover{border-color:var(--border2);}
+.pc-hd{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+.pc-emoji{font-size:20px;}
+.pc-name{font-size:14px;font-weight:600;}
+.pc-id{font-size:10.5px;color:var(--t3);font-family:var(--mono);}
+.pc-progress{height:5px;background:var(--s4);border-radius:3px;margin-bottom:8px;overflow:hidden;}
+.pc-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--plane),var(--purple));}
+.pc-stats{display:flex;gap:12px;font-size:11.5px;color:var(--t2);}
+.pc-health{margin-left:auto;font-size:10px;font-family:var(--mono);padding:2px 7px;border-radius:3px;}
+.h-on{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
+.h-risk{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
+.h-off{background:var(--rd);color:var(--red);border:1px solid var(--rb);}
+
+/* ── PROJECTS / BOARD ── */
+.proj-page{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.pp-hd{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--s1);flex-shrink:0;}
+.pp-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.pp-views{display:flex;gap:4px;}
+.view-btn{padding:4px 10px;border-radius:var(--rsm);font-size:12px;cursor:pointer;background:none;border:1px solid transparent;color:var(--t2);font-family:var(--sans);transition:all 0.1s;}
+.view-btn:hover{border-color:var(--border2);color:var(--text);}
+.view-btn.on{background:var(--pd);border-color:var(--pb);color:var(--plane);}
+.pp-right{margin-left:auto;display:flex;gap:7px;align-items:center;}
+.add-btn{padding:6px 14px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans);}
+.add-btn:hover{background:#3A7AE8;}
+
+/* BOARD VIEW */
+.board{flex:1;overflow-x:auto;overflow-y:hidden;padding:12px 16px;display:flex;gap:12px;}
+.board-col{width:280px;flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
+.bc-hd{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:var(--r);background:var(--s2);border:1px solid var(--border);font-size:12.5px;font-weight:500;margin-bottom:2px;}
+.bc-dot{width:7px;height:7px;border-radius:50%;}
+.bc-ct{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--t3);}
+.wi-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:all 0.15s;animation:fadeUp 0.18s ease both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.wi-card:hover{border-color:var(--border2);background:var(--s3);}
+.wi-hd{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.wi-id{font-family:var(--mono);font-size:10px;color:var(--t3);}
+.wi-type{font-size:10px;padding:1px 6px;border-radius:3px;font-family:var(--mono);}
+.wi-title{font-size:12.5px;line-height:1.5;margin-bottom:8px;}
+.wi-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.wi-priority{font-size:10px;padding:1px 6px;border-radius:3px;font-family:var(--mono);}
+.p-urgent{background:var(--rd);color:var(--red);border:1px solid var(--rb);}
+.p-high{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
+.p-medium{background:var(--pd2);color:var(--purple);border:1px solid var(--pb2);}
+.p-low{background:var(--s4);color:var(--t2);border:1px solid var(--border2);}
+.wi-assignee{font-size:10.5px;color:var(--t3);margin-left:auto;}
+.wi-ai-badge{display:flex;align-items:center;gap:3px;font-size:9.5px;color:var(--purple);background:var(--pd2);padding:1px 5px;border-radius:3px;border:1px solid var(--pb2);}
+
+/* LIST VIEW */
+.list-view{flex:1;overflow-y:auto;}
+.lv-hd{display:grid;grid-template-columns:60px 1fr 90px 80px 80px 100px 60px;padding:6px 16px;font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.07em;color:var(--t3);border-bottom:1px solid var(--border);background:var(--s2);position:sticky;top:0;}
+.lv-row{display:grid;grid-template-columns:60px 1fr 90px 80px 80px 100px 60px;padding:9px 16px;border-bottom:1px solid var(--border);align-items:center;font-size:12.5px;cursor:pointer;transition:background 0.08s;}
+.lv-row:hover{background:var(--s2);}
+.lv-id{font-family:var(--mono);font-size:11px;color:var(--t3);}
+.lv-title{font-size:12.5px;font-weight:500;}
+.lv-state{display:flex;align-items:center;gap:4px;font-size:11.5px;}
+.state-dot{width:7px;height:7px;border-radius:50%;}
+
+/* ── PLANE AI PAGE ── */
+.ai-page{flex:1;display:flex;overflow:hidden;}
+.ai-left{width:360px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:var(--s1);}
+.ai-hd{padding:14px 16px;border-bottom:1px solid var(--border);}
+.ai-title{font-size:16px;font-weight:700;letter-spacing:-0.3px;margin-bottom:3px;display:flex;align-items:center;gap:8px;}
+.ai-sub{font-size:12px;color:var(--t2);line-height:1.5;}
+.ai-form{padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.af-lbl{font-size:9.5px;font-family:var(--mono);text-transform:uppercase;letter-spacing:0.08em;color:var(--t3);margin-bottom:5px;}
+.af-inp{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:8px 11px;font-size:12.5px;font-family:var(--sans);color:var(--text);outline:none;resize:none;line-height:1.6;transition:border-color 0.15s;}
+.af-inp:focus{border-color:var(--pb);}
+.af-inp::placeholder{color:var(--t3);}
+.af-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;}
+.afc{padding:3px 8px;border-radius:3px;font-size:11px;background:var(--s3);border:1px solid var(--border);color:var(--t2);cursor:pointer;}
+.afc:hover{border-color:var(--pb2);color:var(--purple);}
+.af-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.af-btn{padding:8px;border-radius:var(--rsm);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--sans);border:none;transition:all 0.12s;}
+.af-btn-triage{background:var(--plane);color:#fff;}
+.af-btn-triage:hover{background:#3A7AE8;}
+.af-btn-summarize{background:var(--s3);color:var(--t2);border:1px solid var(--border2);}
+.af-btn-summarize:hover{border-color:var(--pb2);color:var(--purple);}
+.af-btn-draft{background:var(--s3);color:var(--t2);border:1px solid var(--border2);}
+.af-btn-draft:hover{border-color:var(--pb);color:var(--plane);}
+.af-btn-agent{background:linear-gradient(135deg,var(--purple),var(--plane));color:#fff;}
+.af-btn-agent:hover{opacity:0.88;}
+.ai-feed{flex:1;overflow-y:auto;padding:10px 16px;}
+
+/* AI RESULT CARDS */
+.ai-result{background:var(--s2);border:1px solid var(--pb2);border-radius:var(--r);padding:11px 13px;margin-bottom:9px;animation:fadeUp 0.2s ease both;}
+.ar-title{font-size:10px;font-family:var(--mono);color:var(--purple);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.ar-body{font-size:12.5px;color:var(--text);line-height:1.7;}
+.ar-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px;}
+.arg-item .agl{font-size:9.5px;font-family:var(--mono);color:var(--t3);margin-bottom:1px;text-transform:uppercase;letter-spacing:0.06em;}
+.arg-item .agv{font-size:12.5px;font-weight:600;}
+.ar-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;}
+.ar-tag{font-size:10px;padding:2px 7px;border-radius:3px;font-family:var(--mono);background:var(--s4);color:var(--t2);border:1px solid var(--border2);}
+
+/* AGENT RUN STEPS */
+.agent-step{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:7px;animation:fadeUp 0.18s ease both;}
+.as-hd{display:flex;align-items:center;gap:7px;padding:6px 11px;background:var(--s2);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--t2);}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dg{background:var(--green)}.db{background:var(--plane)}.dp{background:var(--purple)}.da{background:var(--amber)}.dr{background:var(--red)}.dt{background:var(--teal)}
+.d-blink{animation:blink 0.9s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.1}}
+.as-body{padding:7px 11px;font-size:11.5px;color:var(--t2);}
+
+/* AI RIGHT PANEL */
+.ai-right{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.ar-hd{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--s2);flex-shrink:0;}
+.ar-hd-title{font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;}
+.live-pill{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;color:var(--green);background:var(--gd);padding:2px 7px;border-radius:3px;border:1px solid var(--gb);}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.2s infinite;}
+.ar-body-scroll{flex:1;overflow-y:auto;padding:12px 16px;}
+.typing{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:8px 11px;display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10.5px;color:var(--t3);margin-bottom:8px;}
+.td{width:4px;height:4px;border-radius:50%;background:var(--t3);animation:tdot 1.1s infinite;}
+.td:nth-child(2){animation-delay:.18s}.td:nth-child(3){animation-delay:.36s}
+@keyframes tdot{0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1}}
+
+/* ── WIKI PAGE ── */
+.wiki-layout{display:flex;flex:1;overflow:hidden;}
+.wiki-sidebar{width:260px;border-right:1px solid var(--border);background:var(--s1);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+.ws-hd{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ws-title{font-size:13px;font-weight:600;}
+.ws-new{padding:4px 10px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:11px;cursor:pointer;font-family:var(--sans);}
+.wiki-tree{flex:1;overflow-y:auto;padding:8px;}
+.wt-item{display:flex;flex-direction:column;margin-bottom:2px;}
+.wti-hd{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:var(--rsm);cursor:pointer;transition:background 0.1s;font-size:12.5px;color:var(--t2);}
+.wti-hd:hover{background:var(--s3);color:var(--text);}
+.wti-hd.on{background:var(--pd);color:var(--plane);}
+.wti-icon{font-size:14px;width:17px;text-align:center;}
+.wti-name{flex:1;}
+.wti-views{font-size:10px;font-family:var(--mono);color:var(--t3);}
+.wti-children{padding-left:22px;display:flex;flex-direction:column;gap:1px;margin-top:1px;}
+.wtc-item{font-size:11.5px;color:var(--t3);padding:3px 8px;border-radius:var(--rsm);cursor:pointer;}
+.wtc-item:hover{color:var(--text);background:var(--s3);}
+.wiki-content{flex:1;overflow-y:auto;padding:20px 24px;}
+.wc-breadcrumb{font-size:11.5px;color:var(--t3);font-family:var(--mono);margin-bottom:12px;}
+.wc-title{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+.wc-meta{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--t3);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.wc-body{font-size:13.5px;color:var(--t2);line-height:1.9;}
+.wc-body h2{font-size:16px;font-weight:600;color:var(--text);margin:20px 0 8px;}
+.wc-body h3{font-size:14px;font-weight:600;color:var(--text);margin:14px 0 6px;}
+.wc-body p{margin-bottom:12px;}
+.wc-body ul{padding-left:20px;margin-bottom:12px;}
+.wc-body li{margin-bottom:4px;}
+.wc-body code{font-family:var(--mono);font-size:12px;background:var(--s3);padding:2px 6px;border-radius:3px;color:var(--plane);}
+.wc-body pre{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;font-family:var(--mono);font-size:12px;line-height:1.7;margin-bottom:12px;overflow-x:auto;}
+.ai-generated-banner{background:var(--pd2);border:1px solid var(--pb2);border-radius:var(--r);padding:8px 12px;font-size:11.5px;color:var(--purple);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+
+/* ── DESK PAGE ── */
+.desk-layout{display:flex;flex:1;overflow:hidden;}
+.desk-left{width:320px;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;background:var(--s1);}
+.dl-hd{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.dl-title{font-size:13px;font-weight:600;}
+.desk-stats{padding:10px 14px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.ds-item{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:8px 10px;}
+.dsi-lbl{font-size:9.5px;font-family:var(--mono);text-transform:uppercase;color:var(--t3);margin-bottom:2px;}
+.dsi-val{font-size:18px;font-weight:700;font-family:var(--mono);}
+.ticket-list{flex:1;overflow-y:auto;}
+.ticket-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.08s;}
+.ticket-item:hover{background:var(--s2);}
+.ticket-item.on{background:var(--pd);}
+.ti-hd{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.ti-id{font-family:var(--mono);font-size:10.5px;color:var(--t3);}
+.ti-title{font-size:12.5px;font-weight:500;margin-bottom:4px;line-height:1.4;}
+.ti-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t3);}
+.ti-status{font-size:10px;padding:1px 6px;border-radius:3px;font-family:var(--mono);margin-left:auto;}
+.s-open{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
+.s-prog{background:var(--pd);color:var(--plane);border:1px solid var(--pb);}
+.s-done{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
+.desk-detail{flex:1;overflow-y:auto;padding:18px 20px;}
+.dd-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--t3);}
+.dd-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;}
+.dd-title{font-size:18px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;}
+.dd-meta{display:flex;gap:8px;flex-wrap:wrap;}
+.dd-body{font-size:13px;color:var(--t2);line-height:1.8;margin-bottom:16px;}
+.dd-link-wi{background:var(--pd);border:1px solid var(--pb);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.ddl-id{font-family:var(--mono);font-size:12px;color:var(--plane);}
+.ddl-title{font-size:13px;color:var(--text);}
+.convert-btn{padding:7px 16px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans);margin-left:auto;}
+.convert-btn:hover{background:#3A7AE8;}
+.badge{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;white-space:nowrap;}
+.bg{background:var(--gd);color:var(--green);border:1px solid var(--gb);}
+.bb{background:var(--pd);color:var(--plane);border:1px solid var(--pb);}
+.ba{background:var(--ad);color:var(--amber);border:1px solid var(--ab);}
+.br{background:var(--rd);color:var(--red);border:1px solid var(--rb);}
+.bp{background:var(--pd2);color:var(--purple);border:1px solid var(--pb2);}
+.kv{display:flex;align-items:center;gap:7px;padding:5px 9px;background:var(--s2);border:1px solid var(--border);border-radius:3px;font-size:11px;margin-top:3px;}
+.kl{color:var(--t3);font-family:var(--mono);font-size:9.5px;min-width:80px;}
+.kv-v{color:var(--text);font-weight:500;}
+
+/* BOTTOM */
+.bottom{height:33px;border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:0;background:var(--s1);flex-shrink:0;}
+.bs{padding:0 12px;font-size:11px;border-right:1px solid var(--border);display:flex;align-items:center;gap:5px;color:var(--t2);}
+.bs:first-child{padding-left:0;}
+.bs-val{font-family:var(--mono);font-weight:600;color:var(--text);}
+.bs-credit{margin-left:auto;font-size:10.5px;color:var(--t3);font-family:var(--mono);}
+.bs-credit a{color:var(--plane);text-decoration:none;}
+
+#toast{position:fixed;bottom:16px;right:16px;background:var(--text);color:var(--bg);padding:8px 15px;border-radius:var(--r);font-size:13px;opacity:0;transform:translateY(8px);transition:all 0.2s;pointer-events:none;z-index:999;}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--s4);border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo" onclick="showPage('home')">
+    <div class="tb-logo-mark">P</div>
+    <span class="tb-logo-text">Plane</span>
+  </div>
+  <div class="tb-ws" onclick="toast('Workspace: Acme Corp')">
+    Acme Corp <span style="font-size:10px;color:var(--t3);">▾</span>
+  </div>
+  <div class="tb-right">
+    <div class="tb-pill tp-ai"><span class="tp-dot"></span>Plane AI active</div>
+    <div class="tb-pill tp-live"><span class="tp-dot"></span>3 agents running</div>
+    <button class="tb-btn" onclick="toast('Opening notifications')">🔔</button>
+    <button class="tb-btn tb-btn-solid" onclick="showPage('ai');toast('Opening Plane AI')">✦ Plane AI</button>
+    <div class="tb-avatar" onclick="toast('Shreyash Janbandhu')">S</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-ws">
+      <div class="sb-ws-icon">A</div>
+      <div>
+        <div class="sb-ws-name">Acme Corp</div>
+        <div class="sb-ws-plan">Business Plan</div>
+      </div>
+    </div>
+
+    <div class="sb-sec">Workspace</div>
+    <button class="sb-item on" id="sb-home" onclick="showPage('home',this)"><span class="sb-ic">🏠</span>Home</button>
+    <button class="sb-item" id="sb-inbox" onclick="showPage('home',this);toast('Inbox — 4 unread')"><span class="sb-ic">📥</span>Inbox<span class="sb-ct">4</span></button>
+    <button class="sb-item" id="sb-ai" onclick="showPage('ai',this)"><span class="sb-ic">✦</span>Plane AI<span class="sb-ct" style="background:var(--pd2);color:var(--purple);border:1px solid var(--pb2);">new</span></button>
+
+    <div class="sb-sec">Projects</div>
+    <div class="sb-proj" id="sb-projects">
+      <div class="sp-item on" id="sp-api" onclick="loadProject('p1','API Platform v3',this)"><span class="sp-emoji">🚀</span>API Platform v3</div>
+      <div class="sp-item" id="sp-mob" onclick="loadProject('p2','Mobile App 2.0',this)"><span class="sp-emoji">📱</span>Mobile App 2.0</div>
+      <div class="sp-item" id="sp-ds" onclick="loadProject('p3','Design System',this)"><span class="sp-emoji">🎨</span>Design System</div>
+      <div class="sp-item" id="sp-data" onclick="loadProject('p4','Data Pipeline',this)"><span class="sp-emoji">⚡</span>Data Pipeline</div>
+    </div>
+
+    <div class="sb-sec">Products</div>
+    <button class="sb-item" id="sb-wiki" onclick="showPage('wiki',this)"><span class="sb-ic">📚</span>Wiki</button>
+    <button class="sb-item" id="sb-desk" onclick="showPage('desk',this)"><span class="sb-ic">🎫</span>Desk<span class="sb-ct" style="background:var(--ad);color:var(--amber);border:1px solid var(--ab);">4</span></button>
+
+    <div class="sb-sec">Views</div>
+    <button class="sb-item" onclick="toast('Opening Cycles')"><span class="sb-ic">🔄</span>Cycles</button>
+    <button class="sb-item" onclick="toast('Opening Modules')"><span class="sb-ic">📦</span>Modules</button>
+    <button class="sb-item" onclick="toast('Opening Initiatives')"><span class="sb-ic">🗺</span>Initiatives</button>
+    <button class="sb-item" onclick="toast('Opening Analytics')"><span class="sb-ic">📊</span>Analytics</button>
+
+    <div class="attr">
+      Made by <strong>Shreyash Janbandhu</strong><br>
+      M.Tech · IIIT Allahabad '26<br>
+      Python · Node.js · LangChain<br>
+      <a href="https://github.com/shreyash200120" target="_blank">github.com/shreyash200120</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ── HOME PAGE ── -->
+    <div class="page on" id="page-home">
+      <div class="home-page">
+        <div class="hp-title">Good morning, Shreyash 👋</div>
+        <div class="hp-sub">Here's what's happening across Acme Corp today</div>
+        <div class="dash-grid" id="dash-grid">
+          <div class="dg-card"><div class="dgc-lbl">Total Work Items</div><div class="dgc-val" style="color:var(--plane);">220</div><div class="dgc-sub">Across 4 projects</div></div>
+          <div class="dg-card"><div class="dgc-lbl">In Progress</div><div class="dgc-val" style="color:var(--amber);">42</div><div class="dgc-sub">6 urgent</div></div>
+          <div class="dg-card"><div class="dgc-lbl">Completed</div><div class="dgc-val" style="color:var(--green);">130</div><div class="dgc-sub">59% done overall</div></div>
+          <div class="dg-card"><div class="dgc-lbl">AI Agent Runs</div><div class="dgc-val" style="color:var(--purple);">284</div><div class="dgc-sub">This week</div></div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Projects</div>
+        <div class="proj-grid" id="home-projects">
+          <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">Loading projects...</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Initiatives</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;" id="home-initiatives">
+          <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">Loading...</div>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;">Cycles</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;" id="home-cycles">
+          <div style="padding:20px;text-align:center;color:var(--t3);font-size:12px;">Loading...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PROJECTS PAGE ── -->
+    <div class="page" id="page-projects">
+      <div class="proj-page">
+        <div class="pp-hd">
+          <div class="pp-title">
+            <span id="proj-emoji">🚀</span>
+            <span id="proj-name">API Platform v3</span>
+            <span style="font-family:var(--mono);font-size:10px;color:var(--t3);" id="proj-id">API</span>
+          </div>
+          <div class="pp-views">
+            <button class="view-btn on" id="vb-board" onclick="switchView('board')">⊞ Board</button>
+            <button class="view-btn" id="vb-list" onclick="switchView('list')">☰ List</button>
+            <button class="view-btn" id="vb-cycles" onclick="toast('Cycles view')">🔄 Cycles</button>
+            <button class="view-btn" id="vb-modules" onclick="toast('Modules view')">📦 Modules</button>
+          </div>
+          <div class="pp-right">
+            <button class="tb-btn" onclick="toast('Filtering work items')">⚡ Filters</button>
+            <button class="add-btn" onclick="openAddItem()">+ Add Work Item</button>
+          </div>
+        </div>
+
+        <!-- BOARD VIEW -->
+        <div id="view-board" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
+          <div class="board" id="board-content">
+            <div style="padding:20px;color:var(--t3);font-size:12px;">Loading...</div>
+          </div>
+        </div>
+
+        <!-- LIST VIEW -->
+        <div id="view-list" style="flex:1;overflow:hidden;display:none;flex-direction:column;">
+          <div class="list-view">
+            <div class="lv-hd"><span>ID</span><span>Title</span><span>State</span><span>Priority</span><span>Assignee</span><span>Cycle</span><span>Est.</span></div>
+            <div id="list-content"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLANE AI PAGE ── -->
+    <div class="page" id="page-ai">
+      <div class="ai-page">
+        <div class="ai-left">
+          <div class="ai-hd">
+            <div class="ai-title">✦ Plane AI <span style="font-size:10px;background:var(--pd2);color:var(--purple);padding:2px 7px;border-radius:3px;border:1px solid var(--pb2);font-family:var(--mono);">AI-native</span></div>
+            <div class="ai-sub">Assign agents to work items. Triage, draft, summarize — AI that knows your work, not just your prompts.</div>
+          </div>
+          <div class="ai-form">
+            <div class="af-lbl">Work Item / Query</div>
+            <textarea class="af-inp" id="ai-input" rows="3" placeholder="Describe a work item or ask about your project...">OAuth token refresh fails after 24h timeout causing user session drops in production</textarea>
+            <div class="af-chips">
+              <span class="afc" onclick="setAI('OAuth token refresh fails after 24h timeout causing user session drops in production')">Auth bug</span>
+              <span class="afc" onclick="setAI('Add cursor-based pagination to the /projects endpoint for better performance')">Feature request</span>
+              <span class="afc" onclick="setAI('Summarize progress across all active work items in API Platform v3')">Summarize project</span>
+              <span class="afc" onclick="setAI('WebSocket connection drops randomly on mobile after 5 minutes idle')">Mobile bug</span>
+            </div>
+            <div class="af-actions">
+              <button class="af-btn af-btn-triage" onclick="runAI('triage')">🎯 Triage</button>
+              <button class="af-btn af-btn-summarize" onclick="runAI('summarize')">📊 Summarize</button>
+              <button class="af-btn af-btn-draft" onclick="runAI('draft')">✏️ Draft</button>
+              <button class="af-btn af-btn-agent" onclick="runAI('agent_run')">✦ Agent Run</button>
+            </div>
+          </div>
+          <div class="ai-feed" id="ai-feed">
+            <div style="text-align:center;padding:20px;font-size:12px;color:var(--t3);">Use the actions above to run Plane AI on any work item or project query.</div>
+          </div>
+        </div>
+
+        <div class="ai-right">
+          <div class="ar-hd">
+            <div class="ar-hd-title">Agent Execution Log <div class="live-pill"><div class="live-dot"></div>live</div></div>
+            <button class="tb-btn" style="font-size:11px;padding:3px 8px;" onclick="resetAI()">↺ Reset</button>
+          </div>
+          <div class="ar-body-scroll" id="ai-log">
+            <div style="text-align:center;padding:24px;font-size:13px;color:var(--t3);">Plane AI agent execution steps appear here in real time.<br><span style="font-size:11.5px;margin-top:4px;display:block;">Select an action on the left to watch the AI agent work.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WIKI PAGE ── -->
+    <div class="page" id="page-wiki">
+      <div class="wiki-layout">
+        <div class="wiki-sidebar">
+          <div class="ws-hd">
+            <span class="ws-title">📚 Wiki</span>
+            <button class="ws-new" onclick="toast('Creating new page — AI will draft it')">+ New Page</button>
+          </div>
+          <div class="wiki-tree" id="wiki-tree">
+            <div style="padding:16px;text-align:center;color:var(--t3);font-size:12px;">Loading wiki...</div>
+          </div>
+        </div>
+        <div class="wiki-content" id="wiki-content">
+          <div style="text-align:center;padding:40px;color:var(--t3);">Select a page to read</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DESK PAGE ── -->
+    <div class="page" id="page-desk">
+      <div class="desk-layout">
+        <div class="desk-left">
+          <div class="dl-hd">
+            <span class="dl-title">🎫 Desk</span>
+            <span style="font-size:10px;font-family:var(--mono);color:var(--t3);">6 tickets</span>
+          </div>
+          <div class="desk-stats" id="desk-stats">
+            <div class="ds-item"><div class="dsi-lbl">Open</div><div class="dsi-val" style="color:var(--amber);">2</div></div>
+            <div class="ds-item"><div class="dsi-lbl">In Progress</div><div class="dsi-val" style="color:var(--plane);">2</div></div>
+            <div class="ds-item"><div class="dsi-lbl">Resolved</div><div class="dsi-val" style="color:var(--green);">2</div></div>
+            <div class="ds-item"><div class="dsi-lbl">CSAT</div><div class="dsi-val" style="color:var(--green);">4.7</div></div>
+          </div>
+          <div class="ticket-list" id="ticket-list">
+            <div style="padding:16px;text-align:center;color:var(--t3);font-size:12px;">Loading tickets...</div>
+          </div>
+        </div>
+        <div class="desk-detail" id="desk-detail">
+          <div class="dd-empty">
+            <div style="font-size:40px;margin-bottom:10px;">🎫</div>
+            <div style="font-size:14px;font-weight:500;margin-bottom:4px;">Select a ticket</div>
+            <div style="font-size:12px;">View details and convert to work items</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom">
+  <div class="bs"><span class="bs-val" id="bb-items">220</span>&nbsp;work items</div>
+  <div class="bs"><span class="bs-val">4</span>&nbsp;projects</div>
+  <div class="bs"><span class="bs-val" id="bb-ai">284</span>&nbsp;AI runs</div>
+  <div class="bs"><span class="bs-val">Cloud</span>&nbsp;· self-hosted ready</div>
+  <div class="bs"><span class="bs-val">v4.0</span></div>
+  <div class="bs-credit">Made by <a href="https://github.com/shreyash200120" target="_blank">Shreyash Janbandhu</a> · IIIT Allahabad '26</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+let currentProject = { id:'p1', name:'API Platform v3', emoji:'🚀' };
+let currentView = 'board';
+let selectedTicket = null;
+let selectedWikiPage = null;
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity='1'; t.style.transform='translateY(0)';
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(8px)'; }, 2300);
+}
+
+function showPage(id, sbEl) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+id)?.classList.add('on');
+  document.querySelectorAll('.sb-item,.sp-item').forEach(b=>b.classList.remove('on'));
+  if (sbEl) sbEl.classList.add('on');
+  const sb = document.getElementById('sb-'+id);
+  if (sb) sb.classList.add('on');
+  if (id==='home') loadHome();
+  if (id==='wiki') loadWiki();
+  if (id==='desk') loadDesk();
+}
+
+function loadProject(id, name, el) {
+  currentProject = { id, name, emoji: { p1:'🚀', p2:'📱', p3:'🎨', p4:'⚡' }[id] || '📋' };
+  document.getElementById('proj-name').textContent = name;
+  document.getElementById('proj-emoji').textContent = currentProject.emoji;
+  document.getElementById('proj-id').textContent = id.toUpperCase();
+  document.querySelectorAll('.sp-item').forEach(s=>s.classList.remove('on'));
+  if(el) el.classList.add('on');
+  showPage('projects');
+  document.getElementById('sb-home')?.classList.remove('on');
+  loadWorkItems();
+}
+
+function switchView(v) {
+  currentView = v;
+  document.getElementById('view-board').style.display = v==='board'?'flex':'none';
+  document.getElementById('view-list').style.display = v==='list'?'flex':'none';
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('vb-'+v)?.classList.add('on');
+}
+
+// ── HOME ──
+async function loadHome() {
+  try {
+    const res = await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'projects' }) });
+    const data = await res.json();
+    renderHomeProjects(data.projects);
+    renderInitiatives(data.initiatives);
+    renderCycles(data.cycles);
+  } catch(e) {
+    renderHomeProjects([
+      { id:'p1', name:'API Platform v3', identifier:'API', emoji:'🚀', done:51, total:84, inProgress:18, health:'on_track', lead:'Sarah Chen' },
+      { id:'p2', name:'Mobile App 2.0', identifier:'MOB', emoji:'📱', done:29, total:62, inProgress:14, health:'at_risk', lead:'Marcus Rodriguez' },
+      { id:'p3', name:'Design System', identifier:'DS', emoji:'🎨', done:38, total:41, inProgress:2, health:'on_track', lead:'Priya Patel' },
+      { id:'p4', name:'Data Pipeline', identifier:'DATA', emoji:'⚡', done:12, total:33, inProgress:8, health:'off_track', lead:'James Wilson' },
+    ]);
+    renderInitiatives([{ name:'Q2 2025 — Platform Scaling', projects:['API Platform v3','Data Pipeline'], progress:67 },{ name:'Q2 2025 — Mobile Relaunch', projects:['Mobile App 2.0','Design System'], progress:52 }]);
+    renderCycles([{ name:'Cycle 11', status:'completed', completed:47, total:47 },{ name:'Cycle 12', status:'active', completed:31, total:48 },{ name:'Cycle 13', status:'upcoming', completed:0, total:0 }]);
+  }
+}
+
+function renderHomeProjects(projects) {
+  document.getElementById('home-projects').innerHTML = projects.map(p => {
+    const pct = Math.round(p.done/p.total*100);
+    const hc = p.health==='on_track'?'h-on':p.health==='at_risk'?'h-risk':'h-off';
+    const hl = p.health==='on_track'?'On track':p.health==='at_risk'?'At risk':'Off track';
+    return `<div class="proj-card" onclick="loadProject('${p.id}','${p.name}',null)">
+      <div class="pc-hd"><span class="pc-emoji">${p.emoji}</span><div><div class="pc-name">${p.name}</div><div class="pc-id">${p.identifier}</div></div><span class="pc-health ${hc}">${hl}</span></div>
+      <div class="pc-progress"><div class="pc-bar" style="width:${pct}%"></div></div>
+      <div class="pc-stats"><span style="color:var(--green);">${p.done} done</span><span>${p.inProgress} in progress</span><span>${p.total-p.done-p.inProgress} todo</span><span style="margin-left:auto;color:var(--t3);">Lead: ${p.lead}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderInitiatives(inits) {
+  document.getElementById('home-initiatives').innerHTML = inits.map(i => `
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;">
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:4px;">${i.name}</div>
+      <div style="font-size:11.5px;color:var(--t3);margin-bottom:8px;">${i.projects.join(' · ')}</div>
+      <div style="height:5px;background:var(--s4);border-radius:3px;overflow:hidden;"><div style="height:100%;width:${i.progress}%;background:linear-gradient(90deg,var(--plane),var(--purple));border-radius:3px;"></div></div>
+      <div style="font-size:11px;color:var(--t3);margin-top:4px;text-align:right;">${i.progress}% complete</div>
+    </div>`).join('');
+}
+
+function renderCycles(cycles) {
+  const cols = { completed:'var(--green)', active:'var(--plane)', upcoming:'var(--t3)' };
+  document.getElementById('home-cycles').innerHTML = cycles.map(c => `
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;">
+      <div style="font-size:12.5px;font-weight:600;margin-bottom:4px;">${c.name} <span style="font-size:10px;font-family:var(--mono);color:${cols[c.status]};">${c.status}</span></div>
+      ${c.status!=='upcoming'?`<div style="height:4px;background:var(--s4);border-radius:3px;overflow:hidden;margin-bottom:5px;"><div style="height:100%;width:${c.total?Math.round(c.completed/c.total*100):0}%;background:${cols[c.status]};border-radius:3px;"></div></div>
+      <div style="font-size:11px;color:var(--t3);">${c.completed}/${c.total} items</div>`
+      :`<div style="font-size:11px;color:var(--t3);">Upcoming — not started</div>`}
+    </div>`).join('');
+}
+
+// ── WORK ITEMS ──
+async function loadWorkItems() {
+  document.getElementById('board-content').innerHTML = '<div style="padding:20px;color:var(--t3);font-size:12px;">Loading...</div>';
+  try {
+    const res = await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'work_items', projectId: currentProject.id }) });
+    const data = await res.json();
+    renderBoard(data.items);
+    renderList(data.items);
+  } catch(e) {
+    renderBoard(getFallbackItems());
+    renderList(getFallbackItems());
+  }
+}
+
+function getFallbackItems() {
+  return [
+    { id:'API-241', title:'OAuth token refresh fails after 24h timeout', type:'bug', priority:'urgent', state:'in_progress', assignee:'Sarah Chen', labels:['auth','backend'], estimate:'4h', agentAssigned:true },
+    { id:'API-240', title:'Add rate limiting to public endpoints', type:'feature', priority:'high', state:'in_progress', assignee:'Marcus Rodriguez', labels:['backend'], estimate:'1d', agentAssigned:false },
+    { id:'API-238', title:'Update OpenAPI spec to v3.1', type:'task', priority:'medium', state:'todo', assignee:'Priya Patel', labels:['docs'], estimate:'3h', agentAssigned:false },
+    { id:'API-237', title:'WebSocket connection drops on mobile', type:'bug', priority:'high', state:'todo', assignee:'Sarah Chen', labels:['backend'], estimate:'1d', agentAssigned:false },
+    { id:'API-235', title:'Implement request deduplication', type:'feature', priority:'medium', state:'done', assignee:'Marcus Rodriguez', labels:['backend'], estimate:'1d', agentAssigned:true },
+    { id:'API-234', title:'Fix memory leak in worker process', type:'bug', priority:'urgent', state:'done', assignee:'Sarah Chen', labels:['backend'], estimate:'3h', agentAssigned:false },
+  ];
+}
+
+const typeColors = { bug:'background:var(--rd);color:var(--red);border:1px solid var(--rb)', feature:'background:var(--pd);color:var(--plane);border:1px solid var(--pb)', improvement:'background:var(--td);color:var(--teal);border:1px solid var(--tb)', task:'background:var(--s4);color:var(--t2);border:1px solid var(--border2)', documentation:'background:var(--gd);color:var(--green);border:1px solid var(--gb)' };
+const stateColors = { in_progress:'var(--plane)', todo:'var(--t3)', done:'var(--green)', backlog:'var(--t3)' };
+const stateLabels = { in_progress:'In Progress', todo:'Todo', done:'Done', backlog:'Backlog' };
+
+function renderBoard(items) {
+  const cols = [
+    { key:'todo', label:'Todo', color:'var(--t3)' },
+    { key:'in_progress', label:'In Progress', color:'var(--plane)' },
+    { key:'done', label:'Done', color:'var(--green)' },
+  ];
+  document.getElementById('board-content').innerHTML = cols.map(col => {
+    const colItems = items.filter(i=>i.state===col.key);
+    return `<div class="board-col">
+      <div class="bc-hd"><div class="bc-dot" style="background:${col.color};"></div>${col.label}<span class="bc-ct">${colItems.length}</span></div>
+      ${colItems.map((item,idx) => `<div class="wi-card" style="animation-delay:${idx*0.05}s" onclick="toast('Opening ${item.id}')">
+        <div class="wi-hd"><span class="wi-id">${item.id}</span><span class="wi-type" style="${typeColors[item.type]||''}">${item.type}</span>${item.agentAssigned?`<span class="wi-ai-badge">✦ AI</span>`:''}</div>
+        <div class="wi-title">${item.title}</div>
+        <div class="wi-meta">
+          <span class="wi-priority p-${item.priority}">${item.priority}</span>
+          ${(item.labels||[]).slice(0,1).map(l=>`<span style="font-size:10px;padding:1px 5px;border-radius:3px;background:var(--s4);color:var(--t3);border:1px solid var(--border2);font-family:var(--mono);">${l}</span>`).join('')}
+          <span class="wi-assignee">${item.assignee?.split(' ')[0]||'—'}</span>
+        </div>
+      </div>`).join('')}
+      <div style="padding:6px;border:1px dashed var(--border2);border-radius:var(--r);text-align:center;font-size:11.5px;color:var(--t3);cursor:pointer;margin-top:4px;" onclick="openAddItem()">+ Add</div>
+    </div>`;
+  }).join('');
+}
+
+function renderList(items) {
+  document.getElementById('list-content').innerHTML = items.map(item => `
+    <div class="lv-row" onclick="toast('Opening ${item.id}')">
+      <span class="lv-id">${item.id}</span>
+      <div class="lv-title">${item.title}</div>
+      <div class="lv-state"><div class="state-dot" style="background:${stateColors[item.state]||'var(--t3)'}"></div>${stateLabels[item.state]||item.state}</div>
+      <span class="wi-priority p-${item.priority}" style="display:inline-block;">${item.priority}</span>
+      <span style="font-size:12px;color:var(--t2);">${item.assignee?.split(' ')[0]||'—'}</span>
+      <span style="font-size:11px;color:var(--t3);font-family:var(--mono);">${item.cycle||'Cycle 12'}</span>
+      <span style="font-size:11px;color:var(--t3);font-family:var(--mono);">${item.estimate||'—'}</span>
+    </div>`).join('');
+}
+
+function openAddItem() {
+  showPage('ai');
+  document.getElementById('sb-ai')?.classList.add('on');
+  toast('Use Plane AI to triage and create a new work item');
+}
+
+// ── PLANE AI ──
+function setAI(q) { document.getElementById('ai-input').value = q; }
+
+function resetAI() {
+  document.getElementById('ai-log').innerHTML = '<div style="text-align:center;padding:24px;font-size:13px;color:var(--t3);">Plane AI agent execution steps appear here in real time.</div>';
+  document.getElementById('ai-feed').innerHTML = '<div style="text-align:center;padding:20px;font-size:12px;color:var(--t3);">Use the actions above to run Plane AI on any work item or project query.</div>';
+}
+
+const alog = () => document.getElementById('ai-log');
+const afeed = () => document.getElementById('ai-feed');
+
+function addLog(html) {
+  const d=document.createElement('div'); d.innerHTML=html;
+  alog().appendChild(d.firstElementChild||d);
+  alog().scrollTop=9999;
+}
+function addFeed(html) {
+  const d=document.createElement('div'); d.innerHTML=html;
+  afeed().appendChild(d.firstElementChild||d);
+  afeed().scrollTop=9999;
+}
+function addTyping() {
+  const el=document.createElement('div'); el.id='typing'; el.className='typing';
+  el.innerHTML='<div class="td"></div><div class="td"></div><div class="td"></div><span style="margin-left:5px;">Plane AI thinking...</span>';
+  alog().appendChild(el); alog().scrollTop=9999;
+}
+let aiRunCount = 284;
+
+async function runAI(action) {
+  const input = document.getElementById('ai-input').value;
+  if (!input.trim()) return;
+  alog().innerHTML=''; afeed().innerHTML='';
+
+  addLog(`<div style="padding:8px 11px;background:var(--pd2);border:1px solid var(--pb2);border-radius:var(--r);font-size:11.5px;color:var(--purple);margin-bottom:8px;font-family:var(--mono);">✦ Plane AI · ${action} · "${input.substring(0,55)}${input.length>55?'...':''}"</div>`);
+
+  addTyping(); await sleep(800); document.getElementById('typing')?.remove();
+
+  try {
+    const res = await fetch('/api/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action, input, project: currentProject.name }) });
+    const data = await res.json();
+
+    if (action === 'triage' && data.result) {
+      const r = data.result;
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot db"></div>context_fetch · workspace context loaded</div><div class="as-body">Loaded work item context, wiki pages, and team availability for <strong>${currentProject.name}</strong>.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dp"></div>duplicate_check · 847 items scanned · 0 duplicates</div><div class="as-body">Semantic similarity search across all work items — no duplicates found. Safe to create.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot da"></div>priority_score · confidence: ${r.confidence}</div><div class="as-body">Scored priority as <strong style="color:var(--${r.priority==='urgent'?'red':r.priority==='high'?'amber':'purple'})">${r.priority}</strong> based on keywords, historical patterns, and impact signals.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dg"></div>assignee_match · best-fit: ${r.assignee}</div><div class="as-body">Matched to <strong>${r.assignee}</strong> based on skills (${r.labels.join(', ')}), current workload, and past similar work items.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot db"></div>cycle_placement · ${r.cycle}</div><div class="as-body">Placed in <strong>${r.cycle}</strong> — ${r.priority==='urgent'||r.priority==='high'?'3 open slots in current cycle':'capacity available in next cycle'}.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dt"></div>wiki_link · ${r.wikiLinks.length} pages linked</div><div class="as-body">Linked: ${r.wikiLinks.join(', ')}.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dg"></div>notify · ${r.slackChannel} · assignee notified</div><div class="as-body">Sent context-rich notification to <strong>${r.assignee}</strong> via Slack <strong>${r.slackChannel}</strong> with full work item context.</div></div>`);
+
+      addFeed(`<div class="ai-result">
+        <div class="ar-title">✦ Triage Complete · ${r.agentRun}</div>
+        <div class="ar-body" style="background:var(--s3);border-radius:var(--rsm);padding:8px 10px;margin-bottom:8px;font-size:12px;">${r.aiSummary}</div>
+        <div class="ar-grid">
+          <div class="arg-item"><div class="agl">Type</div><div class="agv">${r.type}</div></div>
+          <div class="arg-item"><div class="agl">Priority</div><div class="agv" style="color:var(--${r.priority==='urgent'?'red':r.priority==='high'?'amber':'purple'})">${r.priority}</div></div>
+          <div class="arg-item"><div class="agl">Assignee</div><div class="agv">${r.assignee}</div></div>
+          <div class="arg-item"><div class="agl">Estimate</div><div class="agv">${r.estimate}</div></div>
+          <div class="arg-item"><div class="agl">Cycle</div><div class="agv" style="font-size:11px;">${r.cycle}</div></div>
+          <div class="arg-item"><div class="agl">Module</div><div class="agv" style="font-size:11px;">${r.module}</div></div>
+        </div>
+        <div class="ar-tags">${r.labels.map(l=>`<span class="ar-tag">${l}</span>`).join('')}</div>
+        <button onclick="toast('Work item created — ${r.assignee} notified')" style="width:100%;margin-top:8px;padding:7px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans);">✓ Create Work Item</button>
+      </div>`);
+
+      document.getElementById('bb-ai').textContent = ++aiRunCount;
+      toast(`✓ Triage complete — assigned to ${r.assignee}`);
+
+    } else if (action === 'summarize' && data.result) {
+      const r = data.result;
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot db"></div>context_load · all work items + cycle data</div><div class="as-body">Loaded ${r.stats.total} work items across current and upcoming cycles.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dp"></div>progress_analysis · completion rate</div><div class="as-body">${r.stats.done}/${r.stats.total} done · ${r.stats.inProgress} in progress · ${r.stats.blockers} blockers detected.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot da"></div>risk_detection · ${r.riskyItems.length} risky items</div><div class="as-body">${r.riskyItems.join(' · ')}</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dg"></div>summary_generated · ready</div><div class="as-body">Project summary generated with next actions and contributor breakdown.</div></div>`);
+
+      addFeed(`<div class="ai-result">
+        <div class="ar-title">📊 Project Summary · ${currentProject.name}</div>
+        <div class="ar-body" style="margin-bottom:10px;">${r.summary}</div>
+        <div class="ar-grid">
+          <div class="arg-item"><div class="agl">Done</div><div class="agv" style="color:var(--green)">${r.stats.done}/${r.stats.total}</div></div>
+          <div class="arg-item"><div class="agl">In Progress</div><div class="agv" style="color:var(--plane)">${r.stats.inProgress}</div></div>
+          <div class="arg-item"><div class="agl">Blockers</div><div class="agv" style="color:var(--red)">${r.stats.blockers}</div></div>
+          <div class="arg-item"><div class="agl">On Track</div><div class="agv" style="color:var(--green)">${r.stats.onTrack?'Yes':'No'}</div></div>
+        </div>
+        <div style="margin-top:9px;font-size:10px;font-family:var(--mono);color:var(--t3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px;">Next Actions</div>
+        ${r.nextActions.map(a=>`<div style="display:flex;gap:6px;font-size:12px;color:var(--t2);padding:3px 0;"><span style="color:var(--plane);">→</span>${a}</div>`).join('')}
+      </div>`);
+      toast('✓ Project summary generated');
+
+    } else if (action === 'draft' && data.result) {
+      const r = data.result;
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot db"></div>type_detection · ${r.type}</div><div class="as-body">Detected work item type: <strong>${r.type}</strong>. Using appropriate template.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dp"></div>template_selection · ${r.type} template</div><div class="as-body">Selected ${r.type} description template with structured sections.</div></div>`);
+      await sleep(300);
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dg"></div>draft_generated · ${r.wordCount} words</div><div class="as-body">Full description drafted with context, steps, acceptance criteria, and technical notes.</div></div>`);
+
+      addFeed(`<div class="ai-result">
+        <div class="ar-title">✏️ AI-Drafted Description · ${r.type}</div>
+        <pre style="font-family:var(--mono);font-size:10.5px;background:var(--s3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;white-space:pre-wrap;line-height:1.7;color:var(--t2);max-height:200px;overflow-y:auto;">${r.draft}</pre>
+        <button onclick="toast('Description applied to work item')" style="width:100%;margin-top:8px;padding:7px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans);">✓ Use This Description</button>
+      </div>`);
+      toast('✓ Description drafted — ' + r.wordCount + ' words');
+
+    } else if (action === 'agent_run' && data.steps) {
+      for (const step of data.steps) {
+        addTyping(); await sleep(step.ms * 0.8); document.getElementById('typing')?.remove();
+        addLog(`<div class="agent-step"><div class="as-hd"><div class="dot ${['db','dp','da','dg','db','dt','dg'][step.step-1]||'db'}"></div>Step ${step.step} · ${step.action}</div><div class="as-body">${step.desc}</div></div>`);
+      }
+      addFeed(`<div class="ai-result">
+        <div class="ar-title">✦ Agent Run Complete · ${data.runId}</div>
+        <div class="ar-body" style="margin-bottom:8px;">All ${data.steps.length} agent steps completed successfully in ${data.totalMs}ms. Work item fully triaged, assigned, placed in cycle, and team notified.</div>
+        <div class="ar-grid">
+          <div class="arg-item"><div class="agl">Steps</div><div class="agv">${data.steps.length}</div></div>
+          <div class="arg-item"><div class="agl">Duration</div><div class="agv">${data.totalMs}ms</div></div>
+          <div class="arg-item"><div class="agl">Run ID</div><div class="agv" style="font-size:11px;">${data.runId}</div></div>
+          <div class="arg-item"><div class="agl">Status</div><div class="agv" style="color:var(--green);">✓ Done</div></div>
+        </div>
+      </div>`);
+      document.getElementById('bb-ai').textContent = ++aiRunCount;
+      toast(`✓ Agent run complete — ${data.steps.length} steps · ${data.totalMs}ms`);
+    }
+  } catch(e) {
+    document.getElementById('typing')?.remove();
+    addLog(`<div style="padding:8px 11px;background:var(--rd);border:1px solid var(--rb);border-radius:var(--r);font-size:11px;color:var(--red);">API unavailable — running in demo mode</div>`);
+    // offline triage fallback
+    setTimeout(()=>{
+      addLog(`<div class="agent-step"><div class="as-hd"><div class="dot dg"></div>context_fetch · loaded</div><div class="as-body">Workspace context loaded for ${currentProject.name}.</div></div>`);
+      addFeed(`<div class="ai-result"><div class="ar-title">✦ Plane AI · Demo Mode</div><div class="ar-body">AI is analyzing: "${input.substring(0,60)}..."<br><br>In production, Plane AI would triage this, assign it to the right engineer, place it in the current cycle, link relevant wiki pages, and notify the team — all autonomously.</div></div>`);
+      toast('Running in demo mode — API unavailable');
+    }, 400);
+  }
+}
+
+// ── WIKI ──
+async function loadWiki() {
+  try {
+    const res = await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'wiki' }) });
+    const data = await res.json();
+    renderWikiTree(data.pages);
+    if (data.pages[0]) openWikiPage(data.pages[0]);
+  } catch(e) {
+    const pages = [
+      { id:'w1', title:'Engineering Guidelines', icon:'📐', views:284, category:'Engineering', children:['Code Review Process','Git Branching Strategy','CI/CD Pipeline'], lastEdited:'2h ago', author:'Sarah Chen' },
+      { id:'w2', title:'API Runbook', icon:'📡', views:412, category:'Engineering', children:['Authentication','Rate Limiting','Error Codes'], lastEdited:'1d ago', author:'James Wilson' },
+      { id:'w3', title:'Incident Response', icon:'🚨', views:187, category:'Operations', children:['P0 Protocol','Escalation Matrix','Post-Mortems'], lastEdited:'3d ago', author:'Marcus Rodriguez' },
+    ];
+    renderWikiTree(pages);
+    openWikiPage(pages[0]);
+  }
+}
+
+function renderWikiTree(pages) {
+  document.getElementById('wiki-tree').innerHTML = pages.map(p => `
+    <div class="wt-item">
+      <div class="wti-hd" id="wt-${p.id}" onclick="fetchAndOpenWiki(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+        <span class="wti-icon">${p.icon}</span>
+        <span class="wti-name">${p.title}</span>
+        <span class="wti-views">${p.views}</span>
+      </div>
+      <div class="wti-children">
+        ${(p.children||[]).map(c=>`<div class="wtc-item" onclick="toast('Opening: ${c}')">${c}</div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function fetchAndOpenWiki(page) {
+  document.querySelectorAll('.wti-hd').forEach(h=>h.classList.remove('on'));
+  document.getElementById('wt-'+page.id)?.classList.add('on');
+  openWikiPage(page);
+}
+
+const wikiContents = {
+  'Engineering Guidelines': `<h2>Overview</h2><p>This document outlines the engineering standards, processes, and best practices at Acme Corp. Every engineer is expected to follow these guidelines to maintain code quality, team velocity, and system reliability.</p><h2>Code Review Process</h2><p>All code changes must be reviewed by at least one engineer before merging. Reviews should be completed within 24 hours of the PR being opened.</p><ul><li>Use <code>git checkout -b feat/your-feature</code> for feature branches</li><li>Keep PRs small — ideally under 400 lines changed</li><li>Always write tests for new functionality</li><li>All CI checks must pass before merge</li></ul><h2>Git Branching Strategy</h2><p>We follow trunk-based development with short-lived feature branches.</p><pre>main (protected)
+├── feat/api-rate-limiting
+├── fix/oauth-token-refresh
+└── chore/update-openapi-spec</pre><h2>CI/CD Pipeline</h2><p>Every PR triggers our full CI pipeline. Merges to main auto-deploy to staging. Production releases are manual with a one-click approval step.</p>`,
+  'API Runbook': `<h2>Overview</h2><p>This runbook covers day-to-day operations, incident response, and maintenance procedures for the Acme API Platform.</p><h2>Authentication</h2><p>The API uses OAuth 2.0 with JWT access tokens. Tokens expire after 24 hours. Refresh tokens are valid for 30 days.</p><ul><li>Token endpoint: <code>POST /auth/token</code></li><li>Refresh endpoint: <code>POST /auth/refresh</code></li><li>Revoke endpoint: <code>POST /auth/revoke</code></li></ul><h2>Rate Limiting</h2><p>Rate limits are applied per API key. Current limits:</p><ul><li>Free tier: 100 req/min</li><li>Pro tier: 1,000 req/min</li><li>Enterprise: 10,000 req/min</li></ul><h2>Error Codes</h2><p>All errors follow RFC 7807 (Problem Details). Common codes: 401 (Unauthorized), 429 (Rate Limited), 503 (Service Unavailable).</p>`,
+  'Incident Response': `<h2>P0 Protocol</h2><p>A P0 is any incident that causes complete service unavailability or data loss. Response time: immediate.</p><ul><li>Page on-call engineer immediately</li><li>Create incident channel: <code>#incident-YYYY-MM-DD</code></li><li>Post hourly updates to #status</li><li>Notify affected customers within 30 minutes</li></ul><h2>Escalation Matrix</h2><p>L1: On-call engineer → L2: Team lead → L3: Engineering Director → L4: CTO</p><h2>Post-Mortems</h2><p>All P0 and P1 incidents require a post-mortem within 48 hours. Focus on systemic improvements, never blame.</p>`,
+};
+
+function openWikiPage(page) {
+  selectedWikiPage = page;
+  const isAIGenerated = page.title === 'Incident Response';
+  document.getElementById('wiki-content').innerHTML = `
+    <div class="wc-breadcrumb">Wiki / ${page.category} / ${page.title}</div>
+    ${isAIGenerated?`<div class="ai-generated-banner">✦ Plane AI auto-updated this page after the last incident · ${page.lastEdited}</div>`:''}
+    <div class="wc-title">${page.icon} ${page.title}</div>
+    <div class="wc-meta">
+      <span>By ${page.author}</span>
+      <span>·</span><span>Edited ${page.lastEdited}</span>
+      <span>·</span><span>${page.views} views</span>
+      <span style="margin-left:auto;display:flex;gap:6px;">
+        <button class="tb-btn" onclick="toast('Editing with AI assistance')">✦ AI Edit</button>
+        <button class="tb-btn" onclick="toast('Sharing page')">Share</button>
+      </span>
+    </div>
+    <div class="wc-body">${wikiContents[page.title] || '<p>Content for this page is available in the full Plane platform.</p>'}</div>`;
+}
+
+// ── DESK ──
+async function loadDesk() {
+  try {
+    const res = await fetch('/api/data', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action:'desk' }) });
+    const data = await res.json();
+    renderTickets(data.tickets);
+    renderDeskStats(data.stats);
+  } catch(e) {
+    renderTickets([
+      { id:'DSK-089', title:'Cannot export project data to CSV', customer:'TechCorp Inc', priority:'high', status:'open', assignee:'Sarah Chen', workItem:'API-242', created:'2h ago', tags:['export'] },
+      { id:'DSK-088', title:'OAuth login broken for GSuite users', customer:'Acme Solutions', priority:'urgent', status:'in_progress', assignee:'Marcus Rodriguez', workItem:'API-241', created:'4h ago', tags:['auth'] },
+      { id:'DSK-087', title:'Webhook notifications not firing', customer:'StartupXYZ', priority:'high', status:'in_progress', assignee:'James Wilson', workItem:'API-243', created:'6h ago', tags:['webhooks'] },
+      { id:'DSK-086', title:'API rate limit too aggressive', customer:'Global Enterprises', priority:'medium', status:'open', assignee:null, workItem:null, created:'1d ago', tags:['rate-limit'] },
+      { id:'DSK-085', title:'Mobile app crashes on iOS 17.4', customer:'RetailChain Co', priority:'urgent', status:'resolved', assignee:'Priya Patel', workItem:'MOB-128', created:'2d ago', tags:['mobile'] },
+    ]);
+  }
+}
+
+function renderDeskStats(stats) {
+  if (!stats) return;
+  document.getElementById('desk-stats').innerHTML = `
+    <div class="ds-item"><div class="dsi-lbl">Open</div><div class="dsi-val" style="color:var(--amber);">${stats.open}</div></div>
+    <div class="ds-item"><div class="dsi-lbl">In Progress</div><div class="dsi-val" style="color:var(--plane);">${stats.inProgress}</div></div>
+    <div class="ds-item"><div class="dsi-lbl">Resolved</div><div class="dsi-val" style="color:var(--green);">${stats.resolved}</div></div>
+    <div class="ds-item"><div class="dsi-lbl">CSAT</div><div class="dsi-val" style="color:var(--green);">${stats.csat}</div></div>`;
+}
+
+function renderTickets(tickets) {
+  const scls = { open:'s-open', in_progress:'s-prog', resolved:'s-done' };
+  const slbl = { open:'Open', in_progress:'In Progress', resolved:'Resolved' };
+  document.getElementById('ticket-list').innerHTML = tickets.map(t => `
+    <div class="ticket-item" id="ti-${t.id}" onclick="openTicket(${JSON.stringify(t).replace(/"/g,'&quot;')})">
+      <div class="ti-hd">
+        <span class="ti-id">${t.id}</span>
+        <span class="wi-priority p-${t.priority}" style="font-size:10px;padding:1px 6px;border-radius:3px;font-family:var(--mono);">${t.priority}</span>
+        <span class="ti-status ${scls[t.status]||'s-open'}">${slbl[t.status]||t.status}</span>
+      </div>
+      <div class="ti-title">${t.title}</div>
+      <div class="ti-meta"><span>${t.customer}</span><span>·</span><span>${t.created}</span>${t.workItem?`<span class="badge bb" style="margin-left:auto;">${t.workItem}</span>`:''}</div>
+    </div>`).join('');
+}
+
+function openTicket(ticket) {
+  selectedTicket = ticket;
+  document.querySelectorAll('.ticket-item').forEach(t=>t.classList.remove('on'));
+  document.getElementById('ti-'+ticket.id)?.classList.add('on');
+  const scls = { open:'ba', in_progress:'bb', resolved:'bg' };
+  const slbl = { open:'Open', in_progress:'In Progress', resolved:'Resolved' };
+  document.getElementById('desk-detail').innerHTML = `
+    <div class="dd-hd">
+      <div>
+        <div style="font-size:11px;font-family:var(--mono);color:var(--t3);margin-bottom:6px;">${ticket.id} · ${ticket.created} · from ${ticket.customer}</div>
+        <div class="dd-title">${ticket.title}</div>
+        <div class="dd-meta">
+          <span class="badge ${scls[ticket.status]||'ba'}">${slbl[ticket.status]||ticket.status}</span>
+          <span class="badge p-${ticket.priority} wi-priority">${ticket.priority}</span>
+          ${ticket.assignee?`<span class="badge bb">${ticket.assignee}</span>`:'<span class="badge ba">Unassigned</span>'}
+          ${(ticket.tags||[]).map(t=>`<span class="ar-tag">${t}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="dd-body">Customer is reporting that ${ticket.title.toLowerCase()}. This was submitted via the support portal and requires engineering investigation. Plane AI has already analyzed this ticket and linked it to the relevant work item.</div>
+    ${ticket.workItem?`<div class="dd-link-wi">
+      <span style="font-size:18px;">🔗</span>
+      <div><div style="font-size:10px;color:var(--t3);font-family:var(--mono);margin-bottom:2px;">Linked Work Item</div><div class="ddl-id">${ticket.workItem}</div></div>
+      <button class="convert-btn" onclick="toast('Opening ${ticket.workItem} in Projects')">Open in Projects →</button>
+    </div>`:`<div style="background:var(--ad);border:1px solid var(--ab);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:18px;">⚠️</span>
+      <div style="font-size:12.5px;color:var(--amber);">No work item linked — Plane AI recommends converting this to a work item</div>
+      <button class="convert-btn" onclick="convertToWorkItem()" style="background:var(--amber);">Convert to Work Item</button>
+    </div>`}
+    <div style="font-size:12.5px;font-weight:600;margin-bottom:8px;">✦ Plane AI Analysis</div>
+    <div class="kv"><span class="kl">root_cause</span><span class="kv-v">${ticket.tags?.includes('auth')?'OAuth token expiry not handled gracefully':ticket.tags?.includes('webhooks')?'Webhook delivery queue backpressure':ticket.tags?.includes('mobile')?'iOS 17.4 UIKit breaking change':'API behavior mismatch with expected response'}</span></div>
+    <div class="kv"><span class="kl">suggested_fix</span><span class="kv-v">${ticket.tags?.includes('auth')?'Implement token refresh retry with exponential backoff':ticket.tags?.includes('webhooks')?'Add dead letter queue and retry mechanism':ticket.tags?.includes('mobile')?'Update deprecated UIKit API calls in v2.0 branch':'Investigate and patch the relevant API endpoint'}</span></div>
+    <div class="kv"><span class="kl">similar_tickets</span><span class="kv-v">3 previous tickets with 84% similarity found</span><span class="badge bb">matched</span></div>
+    <div class="kv"><span class="kl">estimated_fix</span><span class="kv-v">${ticket.priority==='urgent'?'4-6 hours':'1-2 days'}</span></div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button style="flex:1;padding:8px;border-radius:var(--rsm);background:var(--plane);border:none;color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:var(--sans);" onclick="toast('Reply sent to ${ticket.customer}')">Reply to Customer</button>
+      <button style="flex:1;padding:8px;border-radius:var(--rsm);background:var(--s3);border:1px solid var(--border2);color:var(--t2);font-size:12.5px;cursor:pointer;font-family:var(--sans);" onclick="toast('Ticket resolved')">Mark Resolved</button>
+    </div>`;
+}
+
+function convertToWorkItem() {
+  if (!selectedTicket) return;
+  showPage('ai');
+  document.getElementById('ai-input').value = selectedTicket.title;
+  runAI('triage');
+  toast('Converting to work item via Plane AI triage...');
+}
+
+// INIT
+loadHome();
+setTimeout(() => loadProject('p1', 'API Platform v3', document.getElementById('sp-api')), 300);
+</script>
+</body>
+</html>
